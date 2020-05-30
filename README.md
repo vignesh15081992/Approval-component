@@ -26,9 +26,11 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
 
 ## Screenshot
 **Screen with approvals**
+
 ![image](https://drive.google.com/uc?export=view&id=1D7uKfAhfpwN7rLla85SKo62BCiuRBSod)
 
 **Screen without approvals**
+
 ![image](https://drive.google.com/uc?export=view&id=198igrkNBA-WgFDthBORqJ_vWNKPUiXfU)
 
 ## Deployment 
