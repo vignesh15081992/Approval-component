@@ -38,7 +38,7 @@ URL: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0K000001V
 ```
 - Choose `All users` while deploying the package.
 > ***Before you install***, 
-Create a approval process in contact object named as `Test_Approval` with entry criteria as `LastName` is not blank and activate. This is used for installing package. After installation completes, delete this approval process.
+Create a approval process in contact object named as `Test_Approval` with entry criteria as `LastName` is not blank and activate. This is used for installing package. After installation completes, delete this approval process. we are doing this because approval process is not available for packaging.
 
 ## Todos
 
