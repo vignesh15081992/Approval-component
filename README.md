@@ -43,10 +43,10 @@ Create a approval process in contact object named as `Test_Approval` with entry 
  - Add undo function for Approve and Reject actions.
  - Add Night Mode
 
-License
-----
-
-Salesforce Lightning Platform
+About @vignesh15081992
+Trailblazer -  https://trailblazer.me/id/vigneshmohankumar
+Email - vigneshdj60@gmail.com
+Twitter Id - V_my_Atmosphere 
 
 
 **Free Software, Hell Yeah!** :wink: :+1:
