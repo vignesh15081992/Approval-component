@@ -1,7 +1,7 @@
 # Mass Approval Widget
-[![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() [![Generic badge](https://img.shields.io/badge/Code%20coverage-93%-green.svg)]()
+[![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() 
+[![Generic badge](https://img.shields.io/badge/Code%20coverage-93%-green.svg)]()
 
-![image](https://drive.google.com/uc?export=view&id=1kEterIvp59y0QTG5LThsgzP4uK_Guhs_)
 ## App Details
 |  |  |
 | ------ | ------ |
