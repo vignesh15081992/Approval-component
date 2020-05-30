@@ -1,5 +1,5 @@
 # Mass Approval Widget
-[![Github Workflow](<https://github.com/trailheadapps/lwc-recipes/workflows/Salesforce%20DX%20(scratch%20org)/badge.svg?branch=master>)](https://github.com/trailheadapps/lwc-recipes/actions?query=workflow%3A%22Salesforce+DX+%28scratch+org%29%22) 
+[![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() [![Generic badge](https://img.shields.io/badge/Code%20coverage-93%-green.svg)]()
 
 ![image](https://drive.google.com/uc?export=view&id=1kEterIvp59y0QTG5LThsgzP4uK_Guhs_)
 ## App Details
@@ -50,5 +50,6 @@ Create a approval process in contact object named as `Test_Approval` with entry 
 
 
 **Free Software, Hell Yeah!** :wink: :+1:
+
 
 
