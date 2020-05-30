@@ -2,7 +2,7 @@
 [![Github Workflow](<https://github.com/trailheadapps/lwc-recipes/workflows/Salesforce%20DX%20(scratch%20org)/badge.svg?branch=master>)](https://github.com/trailheadapps/lwc-recipes/actions?query=workflow%3A%22Salesforce+DX+%28scratch+org%29%22) 
 
 ![image](https://drive.google.com/uc?export=view&id=1kEterIvp59y0QTG5LThsgzP4uK_Guhs_)
-### App Details
+## App Details
 |  |  |
 | ------ | ------ |
 | **Platform** | Salesforce Lightning Platform |
@@ -12,7 +12,7 @@
 ### Available for
   Lightning Home Page, Lightning App page, Lightning App utility Bar (1000 x 400) pixels in Lightning App.
 
-### Features
+## Features
  - Mass Approve/ Reject Approval requests
  - View Records and View Submitter Comments
  - Infinite scrolling of records with seamless lazy loading
@@ -28,7 +28,7 @@
 **Screen without approvals**
 ![image](https://drive.google.com/uc?export=view&id=198igrkNBA-WgFDthBORqJ_vWNKPUiXfU)
 
-#### Deployment 
+## Deployment 
 You can deploy this widget as managed Package in your Salesforce instance.
 ```sh
 URL: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0K000001VKBA
@@ -37,7 +37,7 @@ URL: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0K000001V
 > ***Before you install***, 
 Create a approval process in contact object named as `Test_Approval` with entry criteria as `LastName` is not blank and activate. This is used for installing package. After installation completes, delete this approval process.
 
-### Todos
+## Todos
 
  - Optimize code
  - Add undo function for Approve and Reject actions.
