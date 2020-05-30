@@ -2,6 +2,10 @@
 [![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() [![Generic badge](https://img.shields.io/badge/Code%20coverage-93%25-green.svg)]()
 
 ## App Details
+
+Salesforce in default doesn't have a screen to approve or reject the pending approval items in one go. User need to click / open each item and do the approvals. This screen enables user to select the records and do the approvals by click Approve or Reject button. This component is developed on LWC framework which is faster and lightweight in salesforce platform. This is generic screen so we can place anywhere in home and app pages even in utility bar. This build is initial and I am optimising code for better performance.
+
+
 |  |  |
 | ------ | ------ |
 | **Platform** | Salesforce Lightning Platform |
