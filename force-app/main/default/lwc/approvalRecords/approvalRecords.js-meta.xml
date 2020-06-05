@@ -11,6 +11,6 @@
      <targetConfigs>
         <targetConfig targets="lightning__AppPage,lightning__HomePage">
             <property name="footertext" type="String" default="Multi Approval by Vignesh" />
-        </targetConfig>
+        </targetConfig> 
     </targetConfigs>
 </LightningComponentBundle>

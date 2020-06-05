@@ -12,7 +12,7 @@ public class MultiRecordsApprovalControllerTest {
       req.setObjectId(c.Id);
      
       //Step 3:  Submit on behalf of a specific submitter
-      req.setSubmitterId(UserInfo.getUserId());
+      req.setSubmitterId(UserInfo.getUserId()); 
    
       //Step 4:  Submit the record to specific process and skip the criteria evaluation
       req.setProcessDefinitionNameOrId('Test_Approval');

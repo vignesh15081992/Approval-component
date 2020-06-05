@@ -3,5 +3,5 @@
     <apiVersion>48.0</apiVersion>
     <description>Confirmation Dialog</description>
     <isExposed>false</isExposed>
-    <masterLabel>Confirmation Dialog</masterLabel>
+    <masterLabel>Confirmation Dialog</masterLabel> 
 </LightningComponentBundle>

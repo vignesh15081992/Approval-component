@@ -16,7 +16,7 @@ export default class ConfirmationDialog extends LightningElement {
             originalMessage: this.originalMessage,
             status: event.target.name
         };
-
+ 
         //dispatch a 'click' event so the parent component can handle it
         this.dispatchEvent(new CustomEvent('click', {detail: finalEvent}));
     }

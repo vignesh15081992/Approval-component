@@ -474,7 +474,7 @@ export default class ApprovalRecords extends LightningElement {
             console.log(event.detail);
             //when user clicks outside of the dialog area, the event is dispatched with detail value  as 1
             if (event.detail !== 1) {
-                console.log('status' + event.detail.status);
+                console.log('status' + event.detail.status); 
                 if (event.detail.status === 'confirm') {
                     this.processrec();
                     this.isDialogVisible = false;

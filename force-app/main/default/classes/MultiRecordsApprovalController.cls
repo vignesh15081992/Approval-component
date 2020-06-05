@@ -85,7 +85,7 @@ public class MultiRecordsApprovalController {
         }
         
         //Approve,reject the record programmatically
-        String message = '';
+        String message = ''; 
         Integer recordsProcessed = 0;
         String comments = processType == 'Approve' ? 'Approved' : 'Rejected';
         List<Approval.ProcessWorkitemRequest> lstWorkItemRequest = new List<Approval.ProcessWorkitemRequest>();//ProcessWorkitemRequest class has methods to programmatically process submitted records
