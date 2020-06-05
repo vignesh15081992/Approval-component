@@ -6,4 +6,4 @@
 .localdevserver
 .sfdx
 
-coverage/
+coverage/ 

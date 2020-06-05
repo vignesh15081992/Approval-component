@@ -10,7 +10,7 @@
 **/lwc/jsconfig.json
 
 # LWC Jest coverage reports
-coverage/
+coverage/ 
 
 # Logs
 logs
