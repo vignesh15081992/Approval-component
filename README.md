@@ -10,8 +10,8 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
 | ------ | ------ |
 | **Platform** | Salesforce Lightning Platform |
 | **Framework** | LWC (Lightning Web Components) |
-| **Version Name** | Beta Release |
-| **Version Number** | 1.0 (BETA 5) |
+| **Package Version Name** | Beta Release |
+| **Package Version Number** | 1.0 (5) |
 ### Available for
   Lightning Home Page, Lightning App page, Lightning App utility Bar (1000 x 400) pixels in Lightning App.
 
@@ -28,10 +28,6 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
 **Screen with approvals**
 
 ![image](https://drive.google.com/uc?export=view&id=1D7uKfAhfpwN7rLla85SKo62BCiuRBSod)
-
-**Screen without approvals**
-
-![image](https://drive.google.com/uc?export=view&id=198igrkNBA-WgFDthBORqJ_vWNKPUiXfU)
 
 ## Deployment 
 You can deploy this widget as managed Package in your Salesforce instance.
