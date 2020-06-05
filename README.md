@@ -10,8 +10,8 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
 | ------ | ------ |
 | **Platform** | Salesforce Lightning Platform |
 | **Framework** | LWC (Lightning Web Components) |
-| **Package Version Name** | Beta Release |
-| **Package Version Number** | 1.0 (5) |
+| **Package Version Name** | Initial Release |
+| **Package Version Number** | 1.0 (Released) |
 ### Available for
   Lightning Home Page, Lightning App page, Lightning App utility Bar (1000 x 400) pixels in Lightning App.
 
@@ -32,7 +32,7 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
 ## Deployment 
 You can deploy this widget as managed Package in your Salesforce instance.
 ```sh
-URL: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0K000001VKBA
+URL: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0K000001VKBF
 ```
 - Choose `All users` while deploying the package.
 > ***Before you install***, 
@@ -44,6 +44,7 @@ Create a approval process in contact object named as `Test_Approval` with entry 
  - [ ] Add undo function for Approve and Reject actions.
  - [ ] Add Night Mode
 
+>Any Bugs ? Please mail me @vigneshdj60@gmail.com
 >Follow me in trailblazer https://trailblazer.me/id/vigneshmohankumar and twitter V_my_Atmosphere. 
 
 
