@@ -44,8 +44,8 @@ Create a approval process in contact object named as `Test_Approval` with entry 
  - [ ] Add undo function for Approve and Reject actions.
  - [ ] Add Night Mode
 
->Any Bugs ? Please mail me @vigneshdj60@gmail.com
->Follow me in trailblazer https://trailblazer.me/id/vigneshmohankumar and twitter V_my_Atmosphere. 
+
+Any Bugs ? Please mail me @vigneshdj60@gmail.com and Follow me in trailblazer https://trailblazer.me/id/vigneshmohankumar and twitter V_my_Atmosphere. 
 
 
 **Free Software, Hell Yeah!** :wink: :+1:
