@@ -41,6 +41,7 @@ Create a approval process in contact object named as `Test_Approval` with entry 
 ## Todos
 
  - [ ] Optimize code
+ - [ ] Filters
  - [ ] Add undo function for Approve and Reject actions.
  - [ ] Add Night Mode
 
