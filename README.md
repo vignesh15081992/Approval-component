@@ -50,7 +50,7 @@ Any Bugs ? Please mail me @vigneshdj60@gmail.com and Follow me in trailblazer ht
 
 
 ### Reference :+1:
-  - [SFDCMonkey](https://sfdcmonkey.com/2020/04/11/approval-screen-sfdc-lightning/) - provids the basic approach on mass approval using apex.  
+  - [SFDCMonkey](https://sfdcmonkey.com/2020/04/11/approval-screen-sfdc-lightning/) - provids the basic approach on mass approval using AURA and apex. I just made it in LWC with added more options.  
 
 
 
