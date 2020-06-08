@@ -49,8 +49,8 @@ Create a approval process in contact object named as `Test_Approval` with entry 
 Any Bugs ? Please mail me @vigneshdj60@gmail.com and Follow me in trailblazer https://trailblazer.me/id/vigneshmohankumar and twitter V_my_Atmosphere. 
 
 
-### Reference 
-  - ![SFDCMonkey.com](https://sfdcmonkey.com/2020/04/11/approval-screen-sfdc-lightning/) for the providing base approach on mass approval using apex. :+1: 
+### Reference :+1:
+  - [SFDCMonkey](https://sfdcmonkey.com/2020/04/11/approval-screen-sfdc-lightning/) - provids the basic approach on mass approval using apex.  
 
 
 
