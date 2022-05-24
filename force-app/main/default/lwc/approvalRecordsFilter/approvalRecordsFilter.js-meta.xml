@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>54.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Filter and Approval Registries</masterLabel>
+    <description>Component used for verify approval pending registries.</description>
+    <targets>
+        <target>lightningCommunity__Default</target>
+        <target>lightning__RecordPage</target>
+        <target>lightning__Tab</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default,lightning__AppPage">
+            <property name="showfilter" label="Show Filter" type="Boolean" description="used for show filter in component"/>
+            <property name="metadataname" label="Custom Medatada name" type="String" description="Developer Name of registry from metadata MassApprovalProcessAttribute__mdt used for filters and columns configurations"/>
+        </targetConfig>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="showfilter" label="Show Filter" type="Boolean" description="used for show filter in component"/>
+            <property name="metadataname" label="Custom Medatada name" type="String" description="Developer  Name of registry from metadata MassApprovalProcessAttribute__mdt used for filters and columns configurations"/>
+            <supportedFormFactors>
+                <supportedFormFactor type="Large"/>
+                <supportedFormFactor type="Small"/>
+            </supportedFormFactors>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

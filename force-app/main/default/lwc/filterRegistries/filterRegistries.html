@@ -1,0 +1,26 @@
+<template>
+  <lightning-card title='' icon-name="">
+    <lightning-button slot="actions" variant="brand" label={label.clearFilter} title={label.clearFilter}
+    icon-name="utility:filterList" class="slds-m-left_x-small" onclick={handleClearFilter} disabled={disableBtn}></lightning-button>
+    <div class='slds-grid slds-gutters slds-p-horizontal_small'>
+      <template if:true={options}>
+        <template for:each={options} for:item="items">
+          <template if:true={items.values}>
+            <div class="slds-col" key={items.field}>
+              <lightning-combobox
+                data-id="reset"
+                id={items.field}
+                name="progress"
+                label={items.label}
+                value={value}
+                placeholder="Select"
+                options={items.values}
+                onchange={handleChange} >
+              </lightning-combobox>
+            </div>
+          </template>
+        </template>
+      </template>
+    </div>
+  </lightning-card>
+</template>

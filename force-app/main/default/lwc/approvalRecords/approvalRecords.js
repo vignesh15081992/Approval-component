@@ -1,408 +1,212 @@
-import { LightningElement, track, api, wire } from 'lwc';
-import getWrapperClassList from '@salesforce/apex/MultiRecordsApprovalController.getSubmittedRecords';
-import processRecords from '@salesforce/apex/MultiRecordsApprovalController.processRecords';
-import gettotalcount from '@salesforce/apex/MultiRecordsApprovalController.gettotalcount';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
 import { refreshApex } from '@salesforce/apex';
+import { LightningElement, track, api, wire } from 'lwc';
+import { CurrentPageReference } from 'lightning/navigation';
+import {registerListener, unregisterListener} from 'c/pubsub';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+import titleApproval from '@salesforce/label/c.PendingApproval';
+import noData from '@salesforce/label/c.MassApprovals_No_Data_Message';
+import noDataHelp from '@salesforce/label/c.MassApprovals_No_Data_HelpText';
+import selectOneOption from '@salesforce/label/c.giic_selectCutsOrSubsOption';
+import nothingSelection from '@salesforce/label/c.SP4CopySPPriceNothingSelected';
+import submitterComments from '@salesforce/label/c.MassApprovals_Submitter_Comments';
+import approveLabel from '@salesforce/label/c.MassApprovals_Approve';
+import rejectLabel from '@salesforce/label/c.MassApprovals_Reject';
+import refreshLabel from '@salesforce/label/c.SP4RURefreshButton';
+import getWrapperClassList from '@salesforce/apex/MultiRecordsApprovalController.filter';
+import gettotalcount from '@salesforce/apex/MultiRecordsApprovalController.gettotalcount';
+import processRecords from '@salesforce/apex/MultiRecordsApprovalController.processRecords';
+import processAllRecords from '@salesforce/apex/MultiRecordsApprovalController.proccessAllrecords';
+import approveAllRecordsWithQuantity from '@salesforce/label/c.ApproveAllRecordsWithQuantity'
+
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+      var args = arguments;
+      return this.replace(/{(\d+)}/g, function(match, number) {
+        return typeof args[number] != 'undefined'
+          ? args[number]
+          : match
+        ;
+      });
+    };
+  }
+
 export default class ApprovalRecords extends LightningElement {
+    label = {
+        noData,
+        noDataHelp,
+        selectOneOption,
+        submitterComments,
+        approveLabel,
+        rejectLabel,
+        refreshLabel,
+        approveAllRecordsWithQuantity
+    };
+
     @api wrapperList = [];
     @api draftValues = [];
-    @track error;
     @track sortBy;
     @track sortDirection;
     @track bShowModal = false;
     @track selectedcommentrowno;
     @track icomments = '';
     @track record;
-    @track queryOffset;
-    @track queryLimit;
     @track totalRecordCount;
     @track showinfiniteLoadingSpinner = true;
     @track showLoadingSpinner = false;
     @track isDialogVisible = false;
     @track originalMessage;
-    @track wrapperListtrue = true;
-    @track title;
-    @api footertext;
+    @track title = titleApproval;
+
     @track enable_app_rej = true;
-    @track columns = [
+    @api objectname='';
+    @api columns;
+    @api columnsnames='';
+    filters={};
+    @track eventApproval;
 
-        /* {
-             label: '#',
-             fieldName: 'recordId',
-             type: 'url',
-             initialWidth:50,
-             typeAttributes: { label: 'View', target: '_blank' }
-         },*/
+    @track pagesize=10;
 
-        {
-            type: 'button-icon',
-            fixedWidth: 40,
-            typeAttributes: {
-                iconName: 'utility:preview',
-                name: 'view_record',
-                title: 'View Record',
-                variant: 'border-filled',
-                alternativeText: 'View Record',
-                disabled: false
-            }
-        },
-        {
-            type: 'button-icon',
-            fixedWidth: 40,
-            typeAttributes: {
-                iconName: 'utility:comments',
-                name: 'submitter_comments',
-                title: 'Submitter comments',
-                variant: 'border-filled',
-                alternativeText: 'Submitter comments',
-                disabled: false
-            }
-        },
-        {
-            label: 'Item Name',
-            fieldName: 'recordName',
-            type: 'text',
-            initialWidth: 200,
-            wrapText: true,
-            sortable: true
-        },
-        {
-            label: 'Related to',
-            fieldName: 'relatedTo',
-            type: 'text',
-            initialWidth: 100,
-            sortable: true
-        },
-        {
-            label: 'Submitter',
-            fieldName: 'submittedBy',
-            type: 'text',
-            initialWidth: 120,
-            sortable: true
-        },
-        {
-            label: 'Submitted on',
-            fieldName: 'submittedDate',
-            type: 'date',
-            initialWidth: 120,
-            typeAttributes: {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-                //hour: '2-digit',
-                //minute: '2-digit',
-                //second: '2-digit',
-                //hour12: true
-            },
-            sortable: true
-        },
+    @wire(CurrentPageReference) pageRef;
 
-        {
-            label: 'Approver Comment',
-            fieldName: 'comments',
-            type: 'text',
-            initialWidth: 290,
-            wrapText: true,
-            editable: true
-        }
-    ];
-    wiredcountResults;
-    @wire(gettotalcount) totalcount(result) {
-        console.log('result.data' + result.data);
-        this.wiredcountResults = result;
-        if (result.data != undefined) {
-            this.totalRecordCount = result.data;
-            console.log('tota' + this.totalRecordCount);
-            this.title = 'Your Pending Approvals (' + this.totalRecordCount + ')';
-            if (result.data > 0)
-                this.wrapperListtrue = true;
-            else {
-                this.totalRecordCount = 0;
-                this.title = 'Your Pending Approvals';
-                this.wrapperListtrue = false;
-                console.log('tota' + this.totalRecordCount);
-            }
-        } else if (result.error) {
-            this.error = result.error;
-            this.totalRecordCount = 0;
-            this.title = 'Your Pending Approvals (' + this.totalRecordCount + ')';
-            this.wrapperListtrue = false;
-            console.log('tota' + this.totalRecordCount);
-        }
+    @track pageable={qty:this.pagesize, lastId:''};
+
+    renderedCallback(){
+
+        registerListener(
+            'filterregistries',
+            this.handleFilters,
+            this
+        );
     }
-    constructor() {
-        super();
-        this.title = 'Your Pending Approvals';
+
+    disconnectedCallback() {
+        unregisterListener('filterregistries', this.handleFilters, this);
+    }
+
+    handleFilters = (event) => {
+        this.filters = event.detail;
+        this.reloadrecords();
+    }
+
+    wiredcountResults;
+    @wire(gettotalcount,{objectName:'$objectname'})
+    totalcount(result) {
+        this.wiredcountResults = result;
+        this.totalRecordCount= 0;
+        if (result.data !=undefined) {
+            this.totalRecordCount = result.data;
+            this.loadRecords();
+        }
+        this.title= titleApproval.format(`(${this.totalRecordCount})`);
+        this.dispatchEvent(new CustomEvent('changetitle',{detail: this.title}));
+    }
+
+    reloadrecords() {
         this.showinfiniteLoadingSpinner = true;
+        this.showLoadingSpinner = true;
+
+        this.pageable={qty:this.pagesize, lastId:''};
         this.wrapperList = [];
-        this.queryOffset = 0;
-        this.queryLimit = 5;
         this.loadRecords();
     }
-    reloadrecords() {
-        this.showLoadingSpinner = true;
-        this.showinfiniteLoadingSpinner = true;
-        this.queryOffset = 0;
-        this.queryLimit = 5;
-        let flatData;
-        this.wrapperList = [];
-        console.log(this.totalRecordCount);
-        return getWrapperClassList({ queryLimit: this.queryLimit, queryOffset: this.queryOffset })
+
+    loadRecords() {
+        getWrapperClassList({ page: this.pageable, inputParams: this.filters, objectName: this.objectname, columnsNames: this.columnsnames })
             .then(result => {
-                console.log(result);
-                console.log(this.totalRecordCount);
-                flatData = result;
-                if (flatData != undefined) {
-                    for (var i = 0; i < flatData.length; i++) {
-                        flatData[i].recordId = '/' + flatData[i].recordId;
-                    }
-                    this.wrapperList = flatData;
+                if (result && result.length>0) {
+                    result= this.flatternObjects(result);
+                    this.wrapperList = [...this.wrapperList, ...result];
+                    this.showinfiniteLoadingSpinner = true;
                 }
-                this.showLoadingSpinner = false;
-                console.log(this.wrapperList);
-                this.showLoadingSpinner = false;
+                this.showLoadingSpinner=false;
                 return refreshApex(this.wiredcountResults);
-                //this.error = undefined;
             }).catch(error => {
-                console.log(error);
-                this.showLoadingSpinner = false;
+                this.showinfiniteLoadingSpinner = false;
                 this.error = error;
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: result,
-                        variant: 'info'
-                    })
-                );
+                this.showToast('Error', error.body?.message, 'info');
                 return refreshApex(this.wiredcountResults);
-            })
+
+            });
     }
-    loadRecords() { //you can build a method for a button
-        console.log('tetst');
-        this.showLoadingSpinner = true;
 
-        let flatData;
-
-        console.log('lr' + this.queryOffset);
-        console.log('lr' + this.queryLimit);
-        return getWrapperClassList({ queryLimit: this.queryLimit, queryOffset: this.queryOffset })
-            .then(result => {
-                console.log(result);
-                flatData = result;
-                if (flatData != undefined) {
-                    for (var i = 0; i < flatData.length; i++) {
-                        flatData[i].recordId = '/' + flatData[i].recordId;
-                    }
-
-                    let updatedRecords = [...this.wrapperList, ...flatData];
-                    this.wrapperList = updatedRecords;
-                }
-                this.showLoadingSpinner = false;
-                console.log(this.wrapperList);
-                refreshApex(this.wiredcountResults);
-                this.title = 'Your Pending Approvals (' + this.totalRecordCount + ')';
-            }).catch(error => {
-                console.log(error);
-                this.showLoadingSpinner = false;
-                this.error = error;
-                refreshApex(this.wiredcountResults);
-                this.title = 'Your Pending Approvals (' + this.totalRecordCount + ')';
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Error',
-                        message: result,
-                        variant: 'info'
-                    })
-                );
-            })
-    }
     loadMoreData(event) {
-        const { target } = event;
-        this.showinfiniteLoadingSpinner = true;
-        //Display a spinner to signal that data is being loaded
-        console.log('lmr totalRecordCount' + this.totalRecordCount);
-        console.log('lmr queryLimit' + this.queryLimit);
-        console.log('lmr queryOffset' + this.queryOffset);
-        if (this.totalRecordCount < this.queryLimit) {
-            console.log(this.wrapperList);
+        if (this.totalRecordCount <= this.wrapperList.length) {
             this.showinfiniteLoadingSpinner = false;
             return refreshApex(this.wiredcountResults);
-        }
-        else if (this.totalRecordCount > this.queryOffset) {
-            this.queryOffset = this.queryOffset + 5;
-            console.log('lmir queryLimit' + this.queryLimit);
-            console.log('lmir queryOffset' + this.queryOffset);
-            let flatData;
-            return getWrapperClassList({ queryLimit: this.queryLimit, queryOffset: this.queryOffset })
-                .then(result => {
-                    target.isLoading = false;
-                    console.log(result);
-                    console.log(this.totalRecordCount);
-                    flatData = result;
-                    if (flatData != undefined) {
-                        for (var i = 0; i < flatData.length; i++) {
-                            flatData[i].recordId = '/' + flatData[i].recordId;
-                        }
-                        //this.wrapperList = this.wrapperList.concat(flatData);
-                        let updatedRecords = [...this.wrapperList, ...flatData];
-                        this.wrapperList = updatedRecords;
-                    }
-                    target.isLoading = false;
-                    console.log(this.wrapperList);
-                    this.showinfiniteLoadingSpinner = false;
-                    return refreshApex(this.wiredcountResults);
-                }).catch(error => {
-                    console.log(error);
-                    this.showinfiniteLoadingSpinner = false;
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error',
-                            message: result,
-                            variant: 'info'
-                        })
-                    );
-                    return refreshApex(this.wiredcountResults);
-                })
-        } else {
-            this.showinfiniteLoadingSpinner = false;
+        }else if(this.showinfiniteLoadingSpinner){
+            let { target } = event;
+            target.isLoading = true;
+            this.loadRecords();
             target.isLoading = false;
-            return refreshApex(this.wiredcountResults);
         }
-
+        this.showinfiniteLoadingSpinner = false;
     }
 
     handleSave(event) {
-        this.showLoadingSpinner = true;
-        console.log(event.detail.draftValues);
-        console.log(this.wrapperList);
-        var draftlst = [];
+        let draftlst = [];
+        this.showLoadingSpinner=true;
         draftlst = event.detail.draftValues;
-        for (var i = 0; i < this.wrapperList.length; i++) {
-            console.log(this.wrapperList[i].workItemId);
-            for (var j = 0; j < draftlst.length; j++) {
-                console.log(draftlst[j].workItemId);
-                if (this.wrapperList[i].workItemId === draftlst[j].workItemId) {
-                    this.wrapperList[i].comments = draftlst[j].comments;
-                }
+        this.wrapperList.forEach(element => {
+            let work=draftlst.find(el=> element.workItemId == el.workItemId);
+            if(work){
+                element.comments = work.comments;
             }
-        }
-        for (var i = 0; i < this.wrapperList.length; i++) {
-            console.log(this.wrapperList[i].comments);
-        }
+        });
+
         this.draftValues = [];
-        this.showLoadingSpinner = false;
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Approver comments Added.',
-                variant: 'success'
-            })
-        );
+        this.showLoadingSpinner=false;
+        this.showToast('Success', 'Approver comments Added.', 'success');
     }
-    enablebuttons(event)
-    {
-         const selectedRows = event.detail.selectedRows;
-         var recordsCount = event.detail.selectedRows.length;
-         if(recordsCount > 0)
-         this.enable_app_rej = false;
-         else
-         this.enable_app_rej = true;
-         
+    enablebuttons(event){
+         let selectedRows = event.detail.selectedRows;
+         let recordsCount = event.detail.selectedRows.length;
+         if(recordsCount > 0){
+            this.enable_app_rej = false;
+         }else{
+            this.enable_app_rej = true;
+         }
     }
     processrec() {
-        this.showLoadingSpinner = true;
-        console.log('test');
-        var el = this.template.querySelector('lightning-datatable');
-        var selectedrows = el.getSelectedRows();
-        console.log(selectedrows);
-        // console.log(event.target.label);
-        var varprocessType = this.originalMessage;// event.target.label;
-        var processrows = [];
-        for (var i = 0; i < selectedrows.length; i++) {
+        let el = this.template.querySelector('lightning-datatable');
+        let selectedrows = el.getSelectedRows();
+        let varprocessType = this.eventApproval;// event.target.label;
+        let processrows = [];
+        this.showLoadingSpinner=true;
+        for (let i = 0; i < selectedrows.length; i++) {
             processrows.push(selectedrows[i]);
         }
         if (processrows.length > 0) {
-            var str = JSON.stringify(processrows);
-            processRecords({ processType: varprocessType, strwraprecs: str })
+            processRecords({ processType: varprocessType, strwraprecs: processrows })
                 .then(result => {
                     this.showinfiniteLoadingSpinner = true;
-                    this.queryOffset = 0;
-                    this.queryLimit = 5;
-                    let flatData;
+                    this.pageable={qty:this.pagesize, lastId:''};
                     this.wrapperList = [];
-                    console.log(this.totalRecordCount);
-                    return getWrapperClassList({ queryLimit: this.queryLimit, queryOffset: this.queryOffset })
-                        .then(result => {
-                            console.log(result);
-                            console.log(this.totalRecordCount);
-                            flatData = result;
-                            if (flatData != undefined) {
-                                for (var i = 0; i < flatData.length; i++) {
-                                    flatData[i].recordId = '/' + flatData[i].recordId;
-                                }
-                                this.wrapperList = flatData;
-                            }
-                            this.showLoadingSpinner = false;
-                            console.log(this.wrapperList);
-                            this.showLoadingSpinner = false;
-                            var messagetitle;
-                            var ivariant;
-                            if(varprocessType == 'Approve')
-                            {
-                                messagetitle = 'Selected records are Approved.';
-                                ivariant = 'success';
-                            }
-                            else if(varprocessType == 'Reject')
-                            {
-                                messagetitle = 'Selected records are Rejected.';
-                                ivariant = 'error';
-                            }
-                            this.dispatchEvent(
-                                new ShowToastEvent({
-                                    title: messagetitle,
-                                    message: result,
-                                    variant: ivariant
-                                })
-                            );
-                            return refreshApex(this.wiredcountResults);
-                        }).catch(error => {
-                            console.log(error);
-                            this.showLoadingSpinner = false;
-                            this.error = error;
-                            this.dispatchEvent(
-                                new ShowToastEvent({
-                                    title: 'Error',
-                                    message: result,
-                                    variant: 'info'
-                                })
-                            );
-                            return refreshApex(this.wiredcountResults);
-                        })
-                })
-                .catch(error => {
-                    this.showLoadingSpinner = false;
-                    this.dispatchEvent(
-                        new ShowToastEvent({
-                            title: 'Error',
-                            message: result,
-                            variant: 'error'
-                        })
-                    );
+                    this.showToast(result, '', 'success');
+                    return this.loadRecords();
+                }).catch(error => {
+                    this.showToast('Error', error.body?.message, 'info');
                     return refreshApex(this.wiredcountResults);
                 });
+        }else {
+            this.showToast(nothingSelection,  selectOneOption, 'warning');
         }
-        else {
-            this.dispatchEvent(
-                new ShowToastEvent({
-                    title: 'No Records chosen.',
-                    message: 'Please select records to proceed.',
-                    variant: 'warning'
-                })
-            );
-            this.showLoadingSpinner = false;
-        }
+    }
+
+    proccessAll(){
+        let varprocessType = this.eventApproval;
+
+        processAllRecords({objectName: this.objectname, processType: varprocessType}).then(result =>{
+            this.showinfiniteLoadingSpinner = true;
+            this.pageable={qty:this.pagesize, lastId:''};
+            this.wrapperList = [];
+            this.showToast(result, '', 'success');
+            return this.loadRecords();
+
+        }).catch(error => {
+            this.showToast('Error', error.body?.message, 'info');
+            return refreshApex(this.wiredcountResults);
+        });
     }
 
     handleSortdata(event) {
@@ -429,9 +233,8 @@ export default class ApprovalRecords extends LightningElement {
     openModal() { this.bShowModal = true; }
     closeModal() { this.bShowModal = false; }
     handleRowAction(event) {
-        const actionName = event.detail.action.name;
-        var row = event.detail.row;
-        console.log(row);
+        let actionName = event.detail.action.name;
+        let row = event.detail.row;
         switch (actionName) {
             case 'view_record':
                 this.viewrecord(row);
@@ -444,50 +247,88 @@ export default class ApprovalRecords extends LightningElement {
     }
     opencomment(row) {
         this.bShowModal = true;
-        console.log(row);
-        const { workItemId } = row;
-        console.log(workItemId);
+        let { workItemId } = row;
         this.record = row;
-        console.log(this.record);
-        this.icomments = this.record.submittercomment;
-        console.log(this.bShowModal);
+        this.icomments = this.record.submitterComments;
     }
     viewrecord(row) {
         this.record = row;
-        console.log(this.record.recordId);
         window.open(this.record.recordId, '_blank');
 
     }
     handleconformClick(event) {
         try {
-        if (event.target.label === 'Approve') {
-            console.log('label' + event.target.label);
-            this.originalMessage = event.target.label;
-            this.isDialogVisible = true;
-        }
-        else if (event.target.label === 'Reject') {
-            console.log('label' + event.target.label);
-            this.originalMessage = event.target.label;
-            this.isDialogVisible = true;
-        }
-        else if (event.target.name === 'confirmModal') {
-            console.log(event.detail);
-            //when user clicks outside of the dialog area, the event is dispatched with detail value  as 1
-            if (event.detail !== 1) {
-                console.log('status' + event.detail.status); 
-                if (event.detail.status === 'confirm') {
-                    this.processrec();
-                    this.isDialogVisible = false;
-                } else if (event.detail.status === 'cancel') {
-                    //do something else
-                    this.isDialogVisible = false;
+            if (event.target && event.target.label && (event.target.label.includes(approveLabel) || event.target.label.includes(rejectLabel))) {
+                this.eventApproval = event.target.label;
+                if(this.eventApproval.includes('All')){
+                    this.originalMessage= approveAllRecordsWithQuantity.format(event.target.label, this.totalRecordCount);
+                }else{
+                    let el = this.template.querySelector('lightning-datatable');
+                    let selectedrows = el.getSelectedRows();
+                    this.originalMessage= approveAllRecordsWithQuantity.format(event.target.label, selectedrows.length);
+
+                }
+                this.isDialogVisible = true;
+            }
+            else if (event.target.name === 'confirmModal') {
+                //when user clicks outside of the dialog area, the event is dispatched with detail value  as 1
+                if (event.detail !== 1) {
+                    if (event.detail.status === 'confirm') {
+                        if(this.eventApproval.includes('All')){
+                            this.proccessAll();
+                        }else{
+                            this.processrec();
+                        }
+
+                        this.isDialogVisible = false;
+                    } else if (event.detail.status === 'cancel') {
+                        //do something else
+                        this.isDialogVisible = false;
+                    }
                 }
             }
-            
-        }
         }
         catch(e) {
             console.log(e);
         }
+    }
+    showToast(title, message, variant){
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: title,
+                message: message,
+                variant: variant
+            })
+        );
+    }
+    flatternObjects(values){
+        let result=[];
+        values.forEach(element => {
+            element.recordId = '/' + element.recordId;
+            result=[...result, this.flattenJSON(element)]
+            this.pageable.lastId = result.reduce(function(prev, current) {
+                return (prev.Id > current.Id) ? prev : current}).Id;
+
+        });
+        return result;
+    }
+
+    flattenJSON(obj = {}, res = {}, extraKey = ''){
+        for(let key in obj){
+           if(typeof obj[key] !== 'object'){
+            res[extraKey + key] = obj[key];
+           }else{
+               let k= key=='obj' ? `${extraKey}`: `${extraKey}${key}.`;
+              this.flattenJSON(obj[key], res, k);
+           };
+        };
+        return res;
+     };
+
+    @api handleChangePageSize(event){
+        this.pagesize = event.detail.value;
+        this.showLoadingSpinner = true;
+        this.wrapperList=[];
+        this.loadRecords();
     }
 }

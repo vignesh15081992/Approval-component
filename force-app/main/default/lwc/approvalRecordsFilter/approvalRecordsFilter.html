@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title={title} icon-name="standard:approval">
+        <div slot="actions" class="slds-size_1">
+            <lightning-combobox variant="label-hidden"
+                name="size"
+                value="10"
+                options={optionsPageSize}
+                onchange={handleChangePageSize} >
+            </lightning-combobox>
+        </div>
+
+
+    <c-filter-registries if:true={filters} objectname={objectname} options={filters} show={showfilter}></c-filter-registries>
+    <c-approval-records if:true={columns} objectname={objectname} columns={columns} columnsnames={columnsNames} onchangetitle={handleTitle}></c-approval-records>
+    </lightning-card>
+</template>

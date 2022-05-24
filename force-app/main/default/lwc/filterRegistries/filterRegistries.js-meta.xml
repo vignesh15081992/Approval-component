@@ -2,6 +2,6 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>54.0</apiVersion>
     <isExposed>true</isExposed>
-    <masterLabel>Datatable for view/approve/reject Approval Registries</masterLabel>
+    <masterLabel>Filter Approval Registries using configuration</masterLabel>
     <description>Component used for verify approval pending registries.</description>
 </LightningComponentBundle>
