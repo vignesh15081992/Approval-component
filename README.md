@@ -1,9 +1,9 @@
 # Mass Approval Widget
-[![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() [![Generic badge](https://img.shields.io/badge/Code%20coverage-93%25-green.svg)]()
+[![Generic badge](https://img.shields.io/badge/Build-Passed-green.svg)]()  [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]() [![Generic badge](https://img.shields.io/badge/Code%20coverage-95%25-green.svg)]()
 
 ## App Details
 
-Salesforce in default doesn't have a screen to approve or reject the pending approval items in one go. Users need to click/ open each item and do the approvals. This screen enables user to select the records and do the approvals by clicking Approve or Reject button. This component is developed on LWC framework which is faster and lightweight in salesforce platform. Since this is a generic screen, so we can place anywhere. This build is initial commit.
+Salesforce in default doesn't have a screen to approve or reject the pending approval items in one go. Users need to click/ open each item and do the approvals. This screen enables user to select the records and do the approvals by clicking Approve or Reject button. This component is developed on LWC framework which is faster and lightweight in salesforce platform. Since this is a generic screen, so we can place anywhere.
 
 
 |  |  |
@@ -23,6 +23,7 @@ Salesforce in default doesn't have a screen to approve or reject the pending app
  - You can sort Item Name, related to, Submitter, Submitted date
  - Wrap Text/ Clip Text options on Columns
  - Refresh button to refresh the Approval requests.
+ - Approve/ Reject All records for logged user
 
 ## Screenshot
 **Screen with approvals**
@@ -41,16 +42,12 @@ Create a approval process in contact object named as `Test_Approval` with entry 
 ## Todos
 
  - [ ] Optimize code
- - [ ] Filters
  - [ ] Add undo function for Approve and Reject actions.
  - [ ] Add Night Mode
 
-
-Any Bugs ? Please mail me @vigneshdj60@gmail.com and Follow me in trailblazer https://trailblazer.me/id/vigneshmohankumar and twitter V_my_Atmosphere. 
-
-
 ### Reference :+1:
   - [SFDCMonkey](https://sfdcmonkey.com/2020/04/11/approval-screen-sfdc-lightning/) - provides the basic approach on mass approval using AURA and apex which is simple and I just made it in LWC with more options.  
+  - [Vignesh Mohankumar](https://github.com/vignesh15081992/Approval-component) - provides the custom component for approval/reject in LWC
 
 
 
