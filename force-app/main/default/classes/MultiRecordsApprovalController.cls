@@ -1,110 +1,105 @@
-public class MultiRecordsApprovalController {
-    
-    //Wrapper class to store the column values of data table
-    public class SubmittedRecordsWrapper{
-        @AuraEnabled public Id workItemId;
-        @AuraEnabled public String recordId;
-        @AuraEnabled public String relatedTo;
-        @AuraEnabled public String recordName;
-        @AuraEnabled public String submittedBy;
-        @AuraEnabled public String submittercomment;
-        @AuraEnabled public Date submittedDate;
-        @AuraEnabled public String comments;
+public with sharing class MultiRecordsApprovalController {
+    private static MultiApprovalService multiApprovalService;
+    private static ProcessInstanceRepository processInstanceRepository;
+    private static Map<String, String> statusApproval = new Map<String, String>{'Approve' => Label.Approval_Status_Approved, 'Reject' => Label.Approval_Status_Rejected};
+
+    static{
+        multiApprovalService= new MultiApprovalService();
+        processInstanceRepository= new ProcessInstanceRepository();
     }
+    /**
+    * @description retrieve Columns and Filters used
+    * @param metadataName
+    * @return List<SubmittedRecordsWrapper>
+    */
+    @AuraEnabled(cacheable=true)
+    public static FilterRegistries getColumnsAndFilters(String metadataName){
+        return FilterRegistries.getInstance(metadataName);
+    }
+
+    /**
+    * @description Retrieve total of registries for approval
+    * @param String objecName
+    * @return Integer
+    */
     @AuraEnabled (cacheable=true)
-    public static integer gettotalcount()
-    {
-        Integer icount = 0;
-        for(ProcessInstance ps : [SELECT Id,TargetObjectId,TargetObject.Name,CreatedDate,
-                                 (SELECT ID FROM WorkItems WHERE OriginalActorId = : UserInfo.getUserId()) FROM ProcessInstance]){
-            if(!ps.WorkItems.isEmpty()){
-                icount++;
-            }
-        }
-        return icount;
+    public static Integer gettotalcount(String objectName){
+        return processInstanceRepository.countPendingApproval(UserInfo.getUserId(), statusApproval.values(), objectName);
     }
+
+    /**
+    * @description
+    * @author Cleberson Barbosa | 05-10-2022
+    * @param ProcessInstanceRepository.Pageable page
+    * @param Map<String String> inputParams
+    * @param String objectName
+    * @param String columnsNames
+    * @return List<SubmittedRecordsWrapper>
+    **/
     @AuraEnabled
-    public static List<SubmittedRecordsWrapper> getSubmittedRecords(Integer queryLimit, Integer queryOffset){
-        system.debug('queryLimit'+queryLimit);
-        system.debug('queryOffset'+queryOffset);
-        List<SubmittedRecordsWrapper> lstSubmissionWrapper = new List<SubmittedRecordsWrapper>();
-        //Process instance stores the info of records submitted for approval,
-        // Process instance work item are the records an approver sees while approving/rejecting, Process instance step stores approved/rejected record including approva;/rejection comments
-        for(ProcessInstance ps : [SELECT Id,TargetObjectId,TargetObject.Name,CreatedDate,
-                                 (SELECT ID FROM WorkItems WHERE OriginalActorId = : UserInfo.getUserId()),
-                                 (SELECT OriginalActor.Name,Comments FROM Steps WHERE StepStatus = 'Started') FROM ProcessInstance
-                                 ORDER BY CreatedDate DESC LIMIT :queryLimit OFFSET :queryOffset]){
-            if(!ps.WorkItems.isEmpty()){
-                SubmittedRecordsWrapper objSubmittedRecordsWrapper = new SubmittedRecordsWrapper();
-                objSubmittedRecordsWrapper.workItemId = ps.WorkItems[0].Id;
-                objSubmittedRecordsWrapper.recordId = ps.TargetObjectId;
-                objSubmittedRecordsWrapper.recordName = ps.TargetObject.Name;
-                objSubmittedRecordsWrapper.comments = '';
-                objSubmittedRecordsWrapper.relatedTo = getObjectName(ps.TargetObjectId);//get the object name using the record id
-                objSubmittedRecordsWrapper.submittedDate = Date.newInstance(ps.CreatedDate.year(),ps.CreatedDate.month(),ps.CreatedDate.day());
-                if(!ps.steps.isEmpty()){
-                    objSubmittedRecordsWrapper.submittedBy = ps.steps[0].OriginalActor.Name;
-                    if(ps.steps[0].Comments == '' || ps.steps[0].Comments == null)
-                    objSubmittedRecordsWrapper.submittercomment = 'No comments from submitter';
-                    else
-                    objSubmittedRecordsWrapper.submittercomment = ps.steps[0].Comments;
-                    lstSubmissionWrapper.add(objSubmittedRecordsWrapper);
-                }
+    public static List<SubmittedRecordsWrapper> filter(ProcessInstanceRepository.Pageable page, Map<String,String> inputParams, String objectName, String columnsNames){
+        List<String> columns= columnsNames?.split(',');
+        List<ProcessInstance> instances= String.isEmpty(objectName) ? processInstanceRepository.getStartedProcessByUserIdAndNotInStatusPageable(page, UserInfo.getUserId(),statusApproval.values())
+        : processInstanceRepository.getStartedProcessByUserAndObjectNameAndNotInStatusPageable(page, UserInfo.getUserId(), objectName,statusApproval.values());
+
+        Map<Id,SubmittedRecordsWrapper> submissionByTargetId= multiApprovalService.builderWrapper(instances);
+        if(String.isNotBlank(objectName) && columns!= null && !columns.isEmpty()){
+            List<SubmittedRecordsWrapper> toReturn=new List<SubmittedRecordsWrapper>();
+
+            String query = multiApprovalService.mountSelect(inputParams, new List<String>(columns), objectName);
+
+            Set<Id> ids = submissionByTargetId.keySet();
+
+            Map<Id, SObject> objects= new Map<Id, SObject>(Database.query(query));
+
+            for (Id id : objects.keySet()) {
+                submissionByTargetId.get(id).obj=objects.get(id);
+                toReturn.add(submissionByTargetId.get(id));
             }
+            return toReturn;
         }
-        system.debug(lstSubmissionWrapper.size());
-        return lstSubmissionWrapper;
+
+        return submissionByTargetId.values();
     }
-    
-    public static String getObjectName(String recordId){
-        //To get the label of the object name using Schema methods
-        String keyPrefix = recordId.subString(0,3);
-        String objectName = '';
-        Map<String,Schema.SObjectType> sobjectTypeMap = Schema.getGlobalDescribe();
-        for(String obj : sobjectTypeMap.keySet()){
-            Schema.DescribeSObjectResult sobjectResult = sobjectTypeMap.get(obj).getDescribe();
-            if(sobjectResult.getKeyPrefix() == keyPrefix){
-                objectName = sobjectResult.getLabel();
-                break;
-            }
-        }
-        return objectName;
-    }
-    
+
+    /**
+    * @description  Process instance stores the info of records submitted for approval,
+    *               Process instance work item are the records an approver sees while approving/rejecting,
+    *               Process instance step stores approved/rejected record including approval/rejection comments
+    * @author Cleberson Barbosa | 05-10-2022
+    * @param String processType
+    * @param List<SubmittedRecordsWrapper> strwraprecs
+    * @return String
+    **/
     @AuraEnabled
-    public static String processRecords(String processType,String strwraprecs){
-        system.debug('processType'+processType);
-        system.debug('wraprecs'+strwraprecs);
-        List<SubmittedRecordsWrapper> wraprecs = (List<SubmittedRecordsWrapper>)System.JSON.deserialize(strwraprecs, List<SubmittedRecordsWrapper>.class);
+    public static String processRecords(String processType,List<SubmittedRecordsWrapper> strwraprecs){
         Map<string,SubmittedRecordsWrapper> mapSubmittedRecordsWrapper = new map<String,SubmittedRecordsWrapper>();
         List<String> lstWorkItemIds = new List<String>();
-        for(SubmittedRecordsWrapper iwrap: wraprecs)
-        {
+        for(SubmittedRecordsWrapper iwrap: strwraprecs){
             mapSubmittedRecordsWrapper.put(iwrap.workItemId,iwrap);
             lstWorkItemIds.add(iwrap.workItemId);
         }
-        
+
         //Approve,reject the record programmatically
-        String message = ''; 
-        Integer recordsProcessed = 0;
-        String comments = processType == 'Approve' ? 'Approved' : 'Rejected';
+        String comments = statusApproval.get(processType);
         List<Approval.ProcessWorkitemRequest> lstWorkItemRequest = new List<Approval.ProcessWorkitemRequest>();//ProcessWorkitemRequest class has methods to programmatically process submitted records
         for(String workItemId : lstWorkItemIds){
             Approval.ProcessWorkitemRequest objWorkItemRequest = new Approval.ProcessWorkitemRequest();
-            if(mapSubmittedRecordsWrapper.containsKey(workItemId))
+            objWorkItemRequest.setComments(comments);
+            if(mapSubmittedRecordsWrapper.containsKey(workItemId)){
                 objWorkItemRequest.setComments(mapSubmittedRecordsWrapper.get(workItemId).comments);
-            else
-                objWorkItemRequest.setComments(comments);
+            }
             objWorkItemRequest.setAction(processType);//approve or reject
             objWorkItemRequest.setWorkitemId(workItemId);
             lstWorkItemRequest.add(objWorkItemRequest);
         }
-        Approval.ProcessResult[] lstProcessResult = Approval.process(lstWorkItemRequest,FALSE);//process method is used for approving/rejecting records depending on setAction attribute
+        Integer recordsProcessed = 0;
+        String message = '';
+        Approval.ProcessResult[] lstProcessResult = Approval.process(lstWorkItemRequest,false);//process method is used for approving/rejecting records depending on setAction attribute
         for(Approval.ProcessResult processResult : lstProcessResult){
             if(processResult.isSuccess()){
                 recordsProcessed++;
-            }
-            else{
+            }else{
                 for(Database.Error error : processResult.getErrors()){
                     message += error.getMessage();
                 }
@@ -115,4 +110,21 @@ public class MultiRecordsApprovalController {
         }
         return message;
     }
+
+    /**
+    * @description method used for approve all records
+    * @author Cleberson Barbosa | 05-18-2022
+    * @param String objectName
+    * @param String processType
+    * @return String
+    **/
+    @AuraEnabled
+    public static String proccessAllrecords(String objectName, String processType){
+        processType= processType.split(' ')[0];
+        Integer total= gettotalcount(objectName);
+        ProcessInstanceRepository.Pageable page = new ProcessInstanceRepository.Pageable(total, '');
+        List<SubmittedRecordsWrapper> wrapper = filter(page, null, objectName, null);
+        return processRecords(processType, wrapper);
+    }
+
 }
